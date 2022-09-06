@@ -40,6 +40,10 @@ if is_configured_file_value == "False":
     lt = localtime()
     rtc.datetime((lt[0], lt[1], lt[2], None, lt[3] + 2, lt[4], lt[5], lt[6]))
 
+    import upip
+
+    upip.install("micropython-umqtt.simple")
+
     f = open(is_configured_file, "w")
     f.write("True")
     f.close()

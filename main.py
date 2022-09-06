@@ -5,6 +5,7 @@ from config import deep_sleep_time, off_time, on_time, light_group
 from machine import Pin, SoftI2C
 import tsl2561
 from rtc import read_time_from_rtc
+from send import send_log_message_to_queue
 
 i2c = SoftI2C(scl=Pin(5), sda=Pin(4))
 lux = tsl2561.TSL2561(i2c=i2c)
@@ -29,13 +30,6 @@ def is_between(time_check, time_range):
         return time_range[0] <= time_check <= time_range[1]
 
 
-def log_to_file(data):
-    print(data)
-    f = open("time.txt", "a")
-    f.write(data + "\n")
-    f.close()
-
-
 def set_brightness_level(brightness_value):
     if not group_status:
         h.setGroup(group_number, bri=brightness_value, on=True)
@@ -55,7 +49,7 @@ group_status = group_info["state"]["any_on"]
 current_time = read_time_from_rtc()
 
 if is_between(current_time, (on_time, off_time)):
-    log_to_file("Current time is {}, this is between {} and {}, light value is {}".format(
+    send_log_message_to_queue("Current time is {}, this is between {} and {}, light value is {}".format(
         current_time, on_time, off_time, light_value))
     if light_value > 10:
         if group_status:
@@ -73,7 +67,7 @@ if is_between(current_time, (on_time, off_time)):
         target_brightness_value = 254
         set_brightness_level(target_brightness_value)
 else:
-    log_to_file("Current time is {}, this is not between {} and {}, light value is {}".format(
+    send_log_message_to_queue("Current time is {}, this is not between {} and {}, light value is {}".format(
         current_time, on_time, off_time, light_value))
     if group_status:
         print("Lights are ON Current time is {}".format(current_time))
